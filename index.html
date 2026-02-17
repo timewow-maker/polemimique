@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1actu2romang — Commentaires d'actualité</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg:      #f5f1eb;
+      --surface: #ffffff;
+      --border:  #d9d0c0;
+      --text:    #1a1612;
+      --muted:   #7a6f60;
+      --accent:  #b5341a;
+      --tag-bg:  #ede8e0;
+      --shadow:  0 2px 12px rgba(0,0,0,.08);
+    }
+    [data-theme="dark"] {
+      --bg:      #141210;
+      --surface: #1e1b18;
+      --border:  #2e2a25;
+      --text:    #e8e0d4;
+      --muted:   #8a7f72;
+      --accent:  #d4644a;
+      --tag-bg:  #272320;
+      --shadow:  0 2px 16px rgba(0,0,0,.35);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Source Serif 4', Georgia, serif;
+      transition: background .3s, color .3s;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--surface);
+      border-bottom: 3px solid var(--text);
+      box-shadow: var(--shadow);
+    }
+    .header-top {
+      max-width: 1100px; margin: 0 auto;
+      padding: 18px 24px 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap;
+    }
+    .masthead-name {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 900; letter-spacing: -.02em;
+      color: var(--text); line-height: 1;
+    }
+    .masthead-tagline {
+      font-family: 'DM Sans', sans-serif;
+      font-size: .7rem; letter-spacing: .18em;
+      text-transform: uppercase; color: var(--muted); margin-top: 5px;
+    }
+    .header-actions { display: flex; align-items: center; gap: 10px; }
+    .search-wrap { position: relative; }
+    .search-input {
+      background: var(--tag-bg); border: 1px solid var(--border);
+      border-radius: 4px; padding: 8px 36px 8px 12px;
+      font-family: 'DM Sans', sans-serif; font-size: .85rem;
+      color: var(--text); width: 200px; outline: none;
+      transition: border-color .2s, width .3s;
+    }
+    .search-input::placeholder { color: var(--muted); }
+    .search-input:focus { border-color: var(--accent); width: 240px; }
+    .search-icon {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      color: var(--muted); pointer-events: none; font-size: 14px;
+    }
+    .theme-btn {
+      background: var(--tag-bg); border: 1px solid var(--border);
+      border-radius: 4px; width: 38px; height: 38px;
+      cursor: pointer; display: grid; place-items: center;
+      font-size: 16px; transition: background .2s; color: var(--text); flex-shrink: 0;
+    }
+    .theme-btn:hover { background: var(--border); }
+    .date-strip {
+      border-top: 1px solid var(--border); text-align: center; padding: 5px;
+      font-family: 'DM Sans', sans-serif; font-size: .7rem; letter-spacing: .1em;
+      color: var(--muted); background: var(--bg);
+    }
+
+    /* ── NAV STICKY ── */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,.07);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: stretch;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .nav-inner::-webkit-scrollbar { display: none; }
+    .cat-btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: .8rem; font-weight: 500;
+      letter-spacing: .07em; text-transform: uppercase;
+      padding: 14px 22px;
+      border: none; background: transparent; cursor: pointer;
+      color: var(--muted);
+      border-bottom: 3px solid transparent;
+      transition: color .15s, border-color .15s, background .15s;
+      white-space: nowrap;
+    }
+    .cat-btn:hover { color: var(--text); background: var(--tag-bg); }
+    .cat-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+
+    /* ── MAIN ── */
+    main { max-width: 1100px; margin: 0 auto; padding: 36px 24px 80px; }
+
+    /* ── HERO ── */
+    .hero-card {
+      display: grid; grid-template-columns: 1fr 1fr;
+      background: var(--surface); border: 1px solid var(--border);
+      border-top: 4px solid var(--accent); box-shadow: var(--shadow);
+      margin-bottom: 36px; cursor: pointer; overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .hero-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.13); }
+    .hero-img {
+      min-height: 300px;
+      background: linear-gradient(135deg, #c9b49a, #a08060);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 5rem;
+      position: relative; overflow: hidden;
+    }
+    .hero-img img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+    .hero-img-credit {
+      position: absolute; bottom: 8px; left: 10px;
+      font-family: 'DM Sans', sans-serif; font-size: .6rem;
+      color: rgba(255,255,255,.85); background: rgba(0,0,0,.45);
+      padding: 2px 7px; border-radius: 2px; pointer-events: none;
+      z-index: 2;
+    }
+    .hero-body {
+      padding: 36px 38px;
+      display: flex; flex-direction: column; justify-content: center; gap: 12px;
+    }
+    .hero-cat {
+      font-family: 'DM Sans', sans-serif; font-size: .68rem; font-weight: 600;
+      letter-spacing: .15em; text-transform: uppercase; color: var(--accent);
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.3rem, 2.5vw, 1.9rem); font-weight: 700; line-height: 1.25;
+    }
+    .hero-summary { font-size: .95rem; line-height: 1.65; color: var(--muted); }
+    .hero-meta {
+      font-family: 'DM Sans', sans-serif; font-size: .75rem; color: var(--muted);
+      display: flex; gap: 14px; align-items: center; margin-top: 4px;
+    }
+    .read-more { color: var(--accent); font-weight: 500; }
+
+    /* ── SECTION TITLE ── */
+    .section-head { display: flex; align-items: center; gap: 14px; margin: 0 0 20px; }
+    .section-head h2 { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; white-space: nowrap; }
+    .section-line { flex: 1; height: 1px; background: var(--border); }
+
+    /* ── GRID ── */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      cursor: pointer; position: relative; overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: var(--accent); transform: scaleY(0); transform-origin: top; transition: transform .2s;
+    }
+    .card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    .card:hover::before { transform: scaleY(1); }
+    .card-body { padding: 20px 22px; flex: 1; }
+    .card-cat {
+      font-family: 'DM Sans', sans-serif; font-size: .65rem; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
+    }
+    .card-title {
+      font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700;
+      line-height: 1.3; margin-bottom: 10px;
+    }
+    .card-summary {
+      font-size: .875rem; line-height: 1.6; color: var(--muted);
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .card-footer {
+      padding: 11px 22px; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .card-date { font-family: 'DM Sans', sans-serif; font-size: .72rem; color: var(--muted); }
+    .tag {
+      font-family: 'DM Sans', sans-serif; font-size: .63rem; font-weight: 500;
+      letter-spacing: .05em; text-transform: uppercase;
+      background: var(--tag-bg); color: var(--muted); border-radius: 2px; padding: 3px 8px;
+    }
+
+    /* ── NO RESULTS ── */
+    .no-results {
+      text-align: center; padding: 80px 20px; color: var(--muted);
+      font-style: italic; font-size: 1.1rem; display: none;
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.52); backdrop-filter: blur(4px);
+      display: none; place-items: center; z-index: 300; padding: 24px;
+    }
+    .modal-overlay.open { display: grid; }
+    .modal {
+      background: var(--surface); max-width: 680px; width: 100%;
+      max-height: 88vh; overflow-y: auto; border-top: 4px solid var(--accent);
+      padding: 44px 44px 40px; animation: slideUp .22s ease; position: relative;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(24px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .modal-close {
+      position: absolute; top: 14px; right: 18px; background: none; border: none;
+      font-size: 1.3rem; cursor: pointer; color: var(--muted); transition: color .2s;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-img {
+      width: calc(100% + 80px); margin: -40px -40px 28px;
+      max-height: 280px; object-fit: cover; display: block;
+    }
+    .modal-img-credit {
+      font-family: 'DM Sans', sans-serif; font-size: .65rem; color: var(--muted);
+      margin-top: -20px; margin-bottom: 20px; text-align: right;
+    }
+    .modal-cat {
+      font-family: 'DM Sans', sans-serif; font-size: .68rem; font-weight: 600;
+      letter-spacing: .15em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px;
+    }
+    .modal-title {
+      font-family: 'Playfair Display', serif; font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 700; line-height: 1.25; margin-bottom: 14px;
+    }
+    .modal-meta {
+      font-family: 'DM Sans', sans-serif; font-size: .78rem; color: var(--muted);
+      margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border);
+    }
+    .modal-body { font-size: 1rem; line-height: 1.8; }
+    .modal-body p + p { margin-top: 1em; }
+
+    /* ── BOUTON + ── */
+    .add-btn {
+      position: fixed; bottom: 30px; right: 30px; background: var(--accent); color: #fff;
+      border: none; border-radius: 50%; width: 54px; height: 54px; font-size: 1.6rem;
+      cursor: pointer; display: grid; place-items: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,.25); transition: transform .2s, box-shadow .2s; z-index: 150;
+    }
+    .add-btn:hover { transform: scale(1.1); box-shadow: 0 8px 28px rgba(0,0,0,.3); }
+
+    /* ── FORMULAIRE ── */
+    .form-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.52); backdrop-filter: blur(4px);
+      display: none; place-items: center; z-index: 300; padding: 24px;
+    }
+    .form-overlay.open { display: grid; }
+    .form-modal {
+      background: var(--surface); max-width: 580px; width: 100%;
+      border-top: 4px solid var(--accent); padding: 36px 40px;
+      animation: slideUp .22s ease; position: relative; max-height: 90vh; overflow-y: auto;
+    }
+    .form-modal h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 22px; }
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      font-family: 'DM Sans', sans-serif; font-size: .75rem; font-weight: 500;
+      letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 6px;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text); font-family: 'Source Serif 4', serif; font-size: .95rem;
+      padding: 10px 14px; border-radius: 3px; outline: none; transition: border-color .2s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+    .form-textarea { resize: vertical; min-height: 120px; }
+    .submit-btn {
+      width: 100%; background: var(--accent); color: #fff; border: none; border-radius: 3px;
+      padding: 13px; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 500;
+      letter-spacing: .08em; text-transform: uppercase; cursor: pointer; margin-top: 8px; transition: opacity .2s;
+    }
+    .submit-btn:hover { opacity: .88; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 2px solid var(--border); text-align: center; padding: 22px;
+      font-family: 'DM Sans', sans-serif; font-size: .75rem; color: var(--muted); background: var(--surface);
+    }
+    footer strong { font-family: 'Playfair Display', serif; font-size: .95rem; color: var(--text); }
+
+    @media (max-width: 680px) {
+      .hero-card { grid-template-columns: 1fr; }
+      .hero-img { min-height: 160px; font-size: 3rem; }
+      .hero-body { padding: 22px; }
+      .modal { padding: 28px 20px; }
+      .form-modal { padding: 28px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-top">
+    <div>
+      <div class="masthead-name">1actu2romang</div>
+      <div class="masthead-tagline">Commentaires d'actualité · indépendant</div>
+    </div>
+    <div class="header-actions">
+      <div class="search-wrap">
+        <input class="search-input" type="search" placeholder="Rechercher…" id="searchInput" />
+        <span class="search-icon">⌕</span>
+      </div>
+      <button class="theme-btn" id="themeBtn" title="Mode sombre / clair">☀️</button>
+    </div>
+  </div>
+  <div class="date-strip" id="dateStrip"></div>
+</header>
+
+<!-- NAV STICKY -->
+<nav>
+  <div class="nav-inner" id="navCats">
+    <button class="cat-btn active" data-cat="Tous">Tous</button>
+    <button class="cat-btn" data-cat="Société & Politique">Société &amp; Politique</button>
+    <button class="cat-btn" data-cat="International & Europe">International &amp; Europe</button>
+    <button class="cat-btn" data-cat="Culture & Sport">Culture &amp; Sport</button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main>
+  <div id="heroZone"></div>
+  <div class="section-head" id="sectionHead" style="display:none">
+    <h2>À lire aussi</h2>
+    <div class="section-line"></div>
+  </div>
+  <div class="grid" id="articleGrid"></div>
+  <p class="no-results" id="noResults">Aucun résultat trouvé.</p>
+</main>
+
+<footer>
+  <strong>1actu2romang</strong> &nbsp;·&nbsp; Commentaires d'actualité &nbsp;·&nbsp; © 2026
+</footer>
+
+<!-- MODAL LECTURE -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" id="modalClose">✕</button>
+    <img class="modal-img" id="mImg" src="" alt="" style="display:none" />
+    <div class="modal-img-credit" id="mCredit" style="display:none"></div>
+    <div class="modal-cat" id="mCat"></div>
+    <h2 class="modal-title" id="mTitle"></h2>
+    <div class="modal-meta" id="mMeta"></div>
+    <div class="modal-body" id="mBody"></div>
+  </div>
+</div>
+
+<!-- BOUTON + -->
+<button class="add-btn" id="openFormBtn" title="Publier un commentaire">＋</button>
+
+<!-- FORMULAIRE -->
+<div class="form-overlay" id="formOverlay">
+  <div class="form-modal">
+    <button class="modal-close" id="formClose">✕</button>
+    <h3>Nouveau commentaire</h3>
+    <div class="form-group">
+      <label class="form-label" for="fTitle">Titre</label>
+      <input class="form-input" id="fTitle" placeholder="Titre de l'article…" />
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="fCat">Rubrique</label>
+      <select class="form-select" id="fCat">
+        <option value="Société & Politique">Société &amp; Politique</option>
+        <option value="International & Europe">International &amp; Europe</option>
+        <option value="Culture & Sport">Culture &amp; Sport</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="fSummary">Accroche</label>
+      <input class="form-input" id="fSummary" placeholder="Une phrase d'introduction…" />
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="fBody">Commentaire complet</label>
+      <textarea class="form-textarea" id="fBody" placeholder="Développez votre analyse ici…"></textarea>
+    </div>
+    <button class="submit-btn" id="submitArticle">Publier</button>
+  </div>
+</div>
+
+<script>
+  const EMOJIS = {
+    'Société & Politique':  '🏛️',
+    'International & Europe': '🌍',
+    'Culture & Sport':      '🎭'
+  };
+
+  let articles = [];
+
+  fetch('articles.json')
+    .then(r => r.json())
+    .then(data => {
+      articles = data;
+      render();
+    })
+    .catch(() => {
+      document.getElementById('noResults').textContent = 'Impossible de charger les articles.';
+      document.getElementById('noResults').style.display = 'block';
+    });
+
+  let currentCat  = 'Tous';
+  let searchQuery = '';
+
+  function filtered() {
+    return articles.filter(a => {
+      const catOk  = currentCat === 'Tous' || a.cat === currentCat;
+      const q      = searchQuery.toLowerCase();
+      const textOk = !q || a.title.toLowerCase().includes(q) || a.summary.toLowerCase().includes(q);
+      return catOk && textOk;
+    });
+  }
+
+  function render() {
+    const list        = filtered();
+    const heroZone    = document.getElementById('heroZone');
+    const grid        = document.getElementById('articleGrid');
+    const noResults   = document.getElementById('noResults');
+    const sectionHead = document.getElementById('sectionHead');
+
+    heroZone.innerHTML = '';
+    grid.innerHTML     = '';
+
+    if (list.length === 0) {
+      noResults.style.display   = 'block';
+      sectionHead.style.display = 'none';
+      return;
+    }
+    noResults.style.display = 'none';
+
+    // Article à la une
+    const h = list[0];
+    heroZone.innerHTML = `
+      <div class="hero-card" data-id="${h.id}">
+        <div class="hero-img">
+          ${h.image
+            ? `<img src="${h.image}" alt="${h.title}" />${h.credit ? `<span class="hero-img-credit">${h.credit}</span>` : ''}`
+            : (EMOJIS[h.cat] || '📰')}
+        </div>
+        <div class="hero-body">
+          <div class="hero-cat">${h.cat}</div>
+          <h2 class="hero-title">${h.title}</h2>
+          <p class="hero-summary">${h.summary}</p>
+          <div class="hero-meta">
+            <span>${h.date}</span>
+            <span class="read-more">Lire le commentaire →</span>
+          </div>
+        </div>
+      </div>`;
+
+    // Grille des autres articles
+    const others = list.slice(1);
+    if (others.length > 0) {
+      sectionHead.style.display = 'flex';
+      others.forEach(a => {
+        const card = document.createElement('div');
+        card.className  = 'card';
+        card.dataset.id = a.id;
+        card.innerHTML  = `
+          <div class="card-body">
+            <div class="card-cat">${a.cat}</div>
+            <h3 class="card-title">${a.title}</h3>
+            <p class="card-summary">${a.summary}</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-date">${a.date}</span>
+            <span class="tag">${a.cat}</span>
+          </div>`;
+        grid.appendChild(card);
+      });
+    } else {
+      sectionHead.style.display = 'none';
+      grid.innerHTML = '';
+    }
+
+    // Clics → ouverture modale
+    document.querySelectorAll('[data-id]').forEach(el => {
+      el.addEventListener('click', () => openModal(parseInt(el.dataset.id)));
+    });
+  }
+
+  function openModal(id) {
+    const a = articles.find(x => x.id === id);
+    if (!a) return;
+    const imgEl    = document.getElementById('mImg');
+    const creditEl = document.getElementById('mCredit');
+    if (a.image) {
+      imgEl.src = a.image; imgEl.alt = a.title; imgEl.style.display = 'block';
+    } else {
+      imgEl.style.display = 'none';
+    }
+    if (a.credit) {
+      creditEl.textContent = a.credit; creditEl.style.display = 'block';
+    } else {
+      creditEl.style.display = 'none';
+    }
+    document.getElementById('mCat').textContent   = a.cat;
+    document.getElementById('mTitle').textContent = a.title;
+    document.getElementById('mMeta').textContent  = a.date;
+    document.getElementById('mBody').innerHTML    =
+      a.body.split('\n\n').filter(Boolean).map(p => `<p>${p}</p>`).join('');
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+
+  document.getElementById('modalClose').addEventListener('click', () =>
+    document.getElementById('modalOverlay').classList.remove('open'));
+  document.getElementById('modalOverlay').addEventListener('click', e => {
+    if (e.target.id === 'modalOverlay')
+      document.getElementById('modalOverlay').classList.remove('open');
+  });
+
+  document.getElementById('openFormBtn').addEventListener('click', () =>
+    document.getElementById('formOverlay').classList.add('open'));
+  document.getElementById('formClose').addEventListener('click', () =>
+    document.getElementById('formOverlay').classList.remove('open'));
+  document.getElementById('formOverlay').addEventListener('click', e => {
+    if (e.target.id === 'formOverlay')
+      document.getElementById('formOverlay').classList.remove('open');
+  });
+
+  document.getElementById('submitArticle').addEventListener('click', () => {
+    const title   = document.getElementById('fTitle').value.trim();
+    const cat     = document.getElementById('fCat').value;
+    const summary = document.getElementById('fSummary').value.trim();
+    const body    = document.getElementById('fBody').value.trim();
+    if (!title || !summary) { alert('Le titre et l\'accroche sont obligatoires.'); return; }
+    const today = new Date().toLocaleDateString('fr-FR', { day:'numeric', month:'short', year:'numeric' });
+    articles.unshift({ id: Date.now(), cat, title, summary, body: body || summary, date: today });
+    document.getElementById('formOverlay').classList.remove('open');
+    ['fTitle','fSummary','fBody'].forEach(id => document.getElementById(id).value = '');
+    currentCat = 'Tous';
+    document.querySelectorAll('.cat-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.cat === 'Tous'));
+    render();
+  });
+
+  // Filtrage par catégorie
+  document.getElementById('navCats').addEventListener('click', e => {
+    const btn = e.target.closest('.cat-btn');
+    if (!btn) return;
+    currentCat = btn.dataset.cat;
+    document.querySelectorAll('.cat-btn').forEach(b =>
+      b.classList.toggle('active', b === btn));
+    render();
+  });
+
+  // Recherche
+  document.getElementById('searchInput').addEventListener('input', e => {
+    searchQuery = e.target.value;
+    render();
+  });
+
+  // Thème sombre / clair
+  document.getElementById('themeBtn').addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme === 'dark';
+    document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+    document.getElementById('themeBtn').textContent = dark ? '☀️' : '🌙';
+  });
+
+  // Date du jour
+  document.getElementById('dateStrip').textContent =
+    new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+</script>
+</body>
+</html>
