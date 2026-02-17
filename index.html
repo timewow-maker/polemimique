@@ -418,7 +418,20 @@
   fetch('articles.json')
     .then(r => r.json())
     .then(data => {
-      articles = data;
+      // Fonction pour convertir tes dates textuelles en objet Date pour le tri
+      const parseDate = (dateStr) => {
+        const months = {
+          'janv.': 0, 'fév.': 1, 'mars': 2, 'avr.': 3, 'mai': 4, 'juin': 5,
+          'juil.': 6, 'août': 7, 'sept.': 8, 'oct.': 9, 'nov.': 10, 'déc.': 11
+        };
+        const p = dateStr.split(' ');
+        // Création de la date : p[2] = année, p[1] = mois, p[0] = jour
+        return new Date(p[2], months[p[1]], p[0]);
+      };
+
+      // Tri : on compare les dates (du plus récent au plus ancien)
+      articles = data.sort((a, b) => parseDate(b.date) - parseDate(a.date));
+      
       render();
     })
     .catch(() => {
