@@ -480,7 +480,7 @@
         <div class="hero-body">
           <div class="hero-cat">${h.cat}</div>
           <h2 class="hero-title">${h.title}</h2>
-          <p class="hero-summary">${h.summary}</p>
+          <p class="hero-summary">${h.body.length > 150 ? h.body.substring(0, 150) + "…" : h.body}</p>
           <div class="hero-meta">
             <span>${h.date}</span>
             <span class="read-more">Lire le commentaire →</span>
@@ -500,7 +500,7 @@
           <div class="card-body">
             <div class="card-cat">${a.cat}</div>
             <h3 class="card-title">${a.title}</h3>
-            <p class="card-summary">${a.summary}</p>
+            <p class="card-summary">${a.body.length > 150 ? a.body.substring(0, 150) + "…" : a.body}</p>
           </div>
           <div class="card-footer">
             <span class="card-date">${a.date}</span>
